@@ -1,0 +1,26 @@
+[
+  {
+    "Id": 1,
+    "title": "Contact Form",
+    "fields": [
+      {
+        "id": "1",
+        "type": "text",
+        "label": "Full Name",
+        "placeholder": "Enter your full name",
+        "required": true,
+        "order": 0
+      },
+      {
+        "id": "2",
+        "type": "email",
+        "label": "Email Address",
+        "placeholder": "Enter your email",
+        "required": true,
+        "order": 1
+      }
+    ],
+    "createdAt": "2024-01-15T10:30:00Z",
+    "publishedUrl": "https://formcraft.app/forms/1"
+  }
+]

@@ -1,0 +1,129 @@
+import React from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import Input from "@/components/atoms/Input"
+import Label from "@/components/atoms/Label"
+import Button from "@/components/atoms/Button"
+import ApperIcon from "@/components/ApperIcon"
+
+const PropertyPanel = ({ field, onUpdate, onClose, isVisible }) => {
+  const handleChange = (property, value) => {
+    onUpdate({ [property]: value })
+  }
+
+  return (
+    <AnimatePresence>
+      {isVisible && field && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            onClick={onClose}
+          />
+          
+          {/* Panel */}
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl border-l border-gray-200 z-50 overflow-y-auto"
+          >
+            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-secondary/5">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-gray-800">Field Properties</h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="h-8 w-8"
+                >
+                  <ApperIcon name="X" size={16} />
+                </Button>
+              </div>
+              <p className="text-xs text-gray-600">Customize your form field</p>
+            </div>
+
+            <div className="p-4 space-y-6">
+              {/* Field Type */}
+              <div>
+                <Label>Field Type</Label>
+                <div className="p-3 bg-gray-50 rounded-lg border">
+                  <div className="flex items-center gap-2">
+                    <ApperIcon name="Type" size={16} className="text-primary" />
+                    <span className="font-medium text-gray-700 capitalize">
+                      {field.type === "textarea" ? "Text Area" : field.type}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Field Label */}
+              <div>
+                <Label>Field Label</Label>
+                <Input
+                  value={field.label}
+                  onChange={(e) => handleChange("label", e.target.value)}
+                  placeholder="Enter field label"
+                />
+              </div>
+
+              {/* Placeholder Text */}
+              <div>
+                <Label>Placeholder Text</Label>
+                <Input
+                  value={field.placeholder}
+                  onChange={(e) => handleChange("placeholder", e.target.value)}
+                  placeholder="Enter placeholder text"
+                />
+              </div>
+
+              {/* Required Field */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <Label>Required Field</Label>
+                  <button
+                    type="button"
+                    onClick={() => handleChange("required", !field.required)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      field.required ? "bg-primary" : "bg-gray-200"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        field.required ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Make this field mandatory for form submission
+                </p>
+              </div>
+
+              {/* Preview */}
+              <div>
+                <Label>Preview</Label>
+                <div className="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <Label>
+                    {field.label}
+                    {field.required && <span className="text-red-500 ml-1">*</span>}
+                  </Label>
+                  <Input
+                    placeholder={field.placeholder}
+                    disabled
+                    className="opacity-75"
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
+
+export default PropertyPanel
