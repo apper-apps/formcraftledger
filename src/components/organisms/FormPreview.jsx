@@ -1,15 +1,60 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import FormField from "@/components/molecules/FormField"
 import Button from "@/components/atoms/Button"
 import ApperIcon from "@/components/ApperIcon"
-
+// Function to evaluate if a field should be visible based on conditions
+const evaluateConditions = (field, formData) => {
+  if (!field.logic?.conditions?.length) return true
+  
+  const { conditions, operator = 'AND' } = field.logic
+  
+  const results = conditions.map(condition => {
+    const fieldValue = formData[`field-${condition.fieldId}`] || ''
+    
+    switch (condition.operator) {
+      case 'equals':
+        return fieldValue === condition.value
+      case 'not_equals':
+        return fieldValue !== condition.value
+      case 'contains':
+        return fieldValue.toLowerCase().includes(condition.value.toLowerCase())
+      case 'not_empty':
+        return fieldValue.trim() !== ''
+      case 'empty':
+        return fieldValue.trim() === ''
+      default:
+        return false
+    }
+  })
+  
+  return operator === 'AND' ? results.every(Boolean) : results.some(Boolean)
+}
 const FormPreview = ({ form }) => {
+  const [formData, setFormData] = useState({})
+  
   const handleSubmit = (e) => {
     e.preventDefault()
     // Simulate form submission
     alert("Form submitted! (This is a preview)")
   }
+  
+  const handleInputChange = (name, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+  
+  // Reset form data when form changes
+  useEffect(() => {
+    setFormData({})
+  }, [form.fields])
+  
+  // Get visible fields based on conditional logic
+  const visibleFields = form.fields
+    .filter(field => evaluateConditions(field, formData))
+    .sort((a, b) => a.order - b.order)
 
   return (
     <div className="w-2/5 bg-white border-l border-gray-200 shadow-xl">
@@ -36,25 +81,29 @@ const FormPreview = ({ form }) => {
             </div>
 
             {/* Form Fields */}
-            {form.fields.length > 0 ? (
-<>
-                {form.fields
-                  .sort((a, b) => a.order - b.order)
-                  .map((field) => (
-                    <motion.div
-                      key={field.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <FormField
-                        label={field.label}
-                        placeholder={field.placeholder}
-                        required={field.required}
-                        type={field.type}
-                        options={field.options}
-                        name={`field-${field.id}`}
-                      />
+{form.fields.length > 0 ? (
+              <>
+                {visibleFields.map((field) => (
+                  <motion.div
+                    key={field.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <FormField
+                      label={field.label}
+                      placeholder={field.placeholder}
+                      required={field.required}
+                      type={field.type}
+                      options={field.options}
+                      name={`field-${field.id}`}
+                      value={formData[`field-${field.id}`] || ''}
+                      onChange={(e) => {
+                        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
+                        handleInputChange(`field-${field.id}`, value)
+                      }}
+                    />
                     </motion.div>
                   ))}
                 

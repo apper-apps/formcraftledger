@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import ConditionBuilder from "@/components/organisms/ConditionBuilder";
 import ApperIcon from "@/components/ApperIcon";
 import Button from "@/components/atoms/Button";
 import Label from "@/components/atoms/Label";
 import Input from "@/components/atoms/Input";
 
-const PropertyPanel = ({ field, onUpdate, onClose, isVisible }) => {
+const PropertyPanel = ({ field, onUpdate, onClose, isVisible, form }) => {
+  const [showConditionBuilder, setShowConditionBuilder] = useState(false)
+  
   const handleChange = (property, value) => {
     onUpdate({ [property]: value })
   }
@@ -155,6 +158,47 @@ const PropertyPanel = ({ field, onUpdate, onClose, isVisible }) => {
                     </div>
                     <p className="text-xs text-gray-500 mt-1">Make this field mandatory for form submission
                                         </p>
+</div>
+
+                {/* Logic Section */}
+                <div className="space-y-3 border-t border-gray-200 pt-6">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-base font-medium text-gray-900">
+                      Conditional Logic
+                    </Label>
+                    {field.logic?.conditions?.length > 0 && (
+                      <div className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                        <ApperIcon name="Zap" size={12} className="mr-1" />
+                        {field.logic.conditions.length} rule{field.logic.conditions.length !== 1 ? 's' : ''}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <p className="text-sm text-gray-600">
+                    Show or hide this field based on responses to previous questions.
+                  </p>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowConditionBuilder(true)}
+                    className="w-full justify-center"
+                  >
+                    <ApperIcon name="Settings" size={16} className="mr-2" />
+                    {field.logic?.conditions?.length > 0 ? 'Edit Logic Rules' : 'Add Logic Rules'}
+                  </Button>
+                  
+                  {field.logic?.conditions?.length > 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-sm text-blue-800 font-medium mb-2">Current Rules:</p>
+                      <div className="space-y-1">
+                        {field.logic.conditions.map((condition, index) => (
+                          <p key={index} className="text-xs text-blue-700">
+                            {index === 0 ? 'Show if' : field.logic.operator} field equals "{condition.value}"
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {/* Preview */}
                 {/* Preview */}

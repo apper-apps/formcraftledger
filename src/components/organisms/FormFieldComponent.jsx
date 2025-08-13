@@ -63,8 +63,10 @@ return (
         className={cn(
           "relative group rounded-lg border-2 transition-all duration-200 cursor-pointer mb-4",
           isSelected 
-            ? "border-accent bg-accent/5 shadow-lg" 
+? "border-accent bg-accent/5 shadow-lg" 
             : "border-transparent hover:border-gray-300 hover:shadow-md",
+          // Add logic indicator styling
+          field.logic?.conditions?.length > 0 && "ring-2 ring-blue-200",
           isDragging && "opacity-50 z-50 rotate-1 scale-105 shadow-xl"
         )}
         onClick={onSelect}
@@ -85,7 +87,13 @@ return (
           </div>
         </div>
 
-        <div className="p-4 pl-8">
+<div className="p-4 pl-8 relative">
+        {/* Logic indicator */}
+        {field.logic?.conditions?.length > 0 && (
+          <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1" title="Has conditional logic">
+            <ApperIcon name="Zap" size={12} />
+          </div>
+        )}
         <FormField
           label={field.label}
           placeholder={field.placeholder}

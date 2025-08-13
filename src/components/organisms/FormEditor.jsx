@@ -177,7 +177,7 @@ try {
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <FormFieldComponent
+<FormFieldComponent
                           field={field}
                           isSelected={selectedField?.id === field.id}
                           onSelect={() => onSelectField(field)}

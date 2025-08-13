@@ -6,6 +6,7 @@ import ComponentPalette from "@/components/organisms/ComponentPalette"
 import FormEditor from "@/components/organisms/FormEditor"
 import FormPreview from "@/components/organisms/FormPreview"
 import PropertyPanel from "@/components/organisms/PropertyPanel"
+import ConditionBuilder from "@/components/organisms/ConditionBuilder"
 import Loading from "@/components/ui/Loading"
 import Error from "@/components/ui/Error"
 import { formsService } from "@/services/api/formsService"
@@ -19,7 +20,7 @@ const FormBuilderPage = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [showPropertyPanel, setShowPropertyPanel] = useState(false)
-
+  const [showConditionBuilder, setShowConditionBuilder] = useState(false)
   const handleUpdateForm = (updatedForm) => {
     setForm(updatedForm)
   }
@@ -36,7 +37,9 @@ if (selectedField) {
           ...field, 
           ...updates,
           // Preserve options array structure for choice fields
-          ...(updates.options ? { options: updates.options } : {})
+          ...(updates.options ? { options: updates.options } : {}),
+          // Preserve logic structure
+          ...(updates.logic !== undefined ? { logic: updates.logic } : {})
         } : field
       )
       setForm({
@@ -46,7 +49,8 @@ if (selectedField) {
       setSelectedField({ 
         ...selectedField, 
         ...updates,
-        ...(updates.options ? { options: updates.options } : {})
+        ...(updates.options ? { options: updates.options } : {}),
+        ...(updates.logic !== undefined ? { logic: updates.logic } : {})
       })
     }
   }
@@ -57,7 +61,10 @@ if (selectedField) {
   }
 
   const handleFieldDragStart = (fieldData) => {
-    // Optional: Add any drag start logic here
+// Initialize logic property for new fields
+    if (fieldData && !fieldData.logic) {
+      fieldData.logic = null
+    }
     console.log("Drag started for field:", fieldData.type)
   }
 
@@ -79,7 +86,7 @@ if (selectedField) {
         <ComponentPalette onFieldDragStart={handleFieldDragStart} />
 
         {/* Form Editor */}
-        <FormEditor
+<FormEditor
           form={form}
           onUpdateForm={handleUpdateForm}
           onSelectField={handleSelectField}
@@ -93,9 +100,19 @@ if (selectedField) {
       {/* Property Panel */}
       <PropertyPanel
         field={selectedField}
+        form={form}
         onUpdate={handleFieldUpdate}
         onClose={handleClosePropertyPanel}
         isVisible={showPropertyPanel}
+      />
+
+      {/* Condition Builder */}
+      <ConditionBuilder
+        field={selectedField}
+        form={form}
+        isVisible={showConditionBuilder}
+        onClose={() => setShowConditionBuilder(false)}
+        onSave={handleFieldUpdate}
       />
 
       {/* Toast Notifications */}
