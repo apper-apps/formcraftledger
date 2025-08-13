@@ -17,25 +17,39 @@ export const formsService = {
     return form ? { ...form } : null
   },
 
-  async create(formData) {
+async create(formData) {
     await delay(400)
     const newId = Math.max(...forms.map(f => f.Id), 0) + 1
     const newForm = {
       ...formData,
       Id: newId,
       createdAt: new Date().toISOString(),
-      publishedUrl: `https://formcraft.app/forms/${newId}`
+      publishedUrl: `https://formcraft.app/forms/${newId}`,
+      // Ensure fields with options are properly structured
+      fields: (formData.fields || []).map(field => ({
+        ...field,
+        ...(field.options && Array.isArray(field.options) ? { options: field.options } : {})
+      }))
     }
     forms.push(newForm)
     return { ...newForm }
   },
 
-  async update(id, updates) {
+async update(id, updates) {
     await delay(350)
     const index = forms.findIndex(f => f.Id === parseInt(id))
     if (index !== -1) {
-      forms[index] = { ...forms[index], ...updates }
-      return { ...forms[index] }
+      const updatedForm = {
+        ...forms[index],
+        ...updates,
+        // Ensure fields with options are properly structured
+        fields: (updates.fields || forms[index].fields || []).map(field => ({
+          ...field,
+          ...(field.options && Array.isArray(field.options) ? { options: field.options } : {})
+        }))
+      }
+      forms[index] = updatedForm
+      return { ...updatedForm }
     }
     return null
   },

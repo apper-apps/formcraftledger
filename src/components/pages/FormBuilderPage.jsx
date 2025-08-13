@@ -30,15 +30,24 @@ const FormBuilderPage = () => {
   }
 
   const handleFieldUpdate = (updates) => {
-    if (selectedField) {
+if (selectedField) {
       const updatedFields = form.fields.map(field =>
-        field.id === selectedField.id ? { ...field, ...updates } : field
+        field.id === selectedField.id ? { 
+          ...field, 
+          ...updates,
+          // Preserve options array structure for choice fields
+          ...(updates.options ? { options: updates.options } : {})
+        } : field
       )
       setForm({
         ...form,
         fields: updatedFields
       })
-      setSelectedField({ ...selectedField, ...updates })
+      setSelectedField({ 
+        ...selectedField, 
+        ...updates,
+        ...(updates.options ? { options: updates.options } : {})
+      })
     }
   }
 

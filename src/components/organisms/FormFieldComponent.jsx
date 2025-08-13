@@ -17,12 +17,14 @@ const FormFieldComponent = ({ field, isSelected, onSelect, onUpdate, onDelete })
       onClick={onSelect}
       whileHover={{ scale: 1.01 }}
     >
-      <div className="p-4">
+<div className="p-4">
         <FormField
           label={field.label}
           placeholder={field.placeholder}
           required={field.required}
           type={field.type}
+          options={field.options}
+          name={`field-${field.id}`}
           disabled
         />
       </div>

@@ -11,13 +11,39 @@
         "required": true,
         "order": 0
       },
-      {
+{
         "id": "2",
         "type": "email",
         "label": "Email Address",
         "placeholder": "Enter your email",
         "required": true,
         "order": 1
+      },
+      {
+        "id": "3",
+        "type": "radio",
+        "label": "Preferred Contact Method",
+        "required": false,
+        "order": 2,
+        "options": [
+          { "label": "Email", "value": "email" },
+          { "label": "Phone", "value": "phone" },
+          { "label": "Text Message", "value": "sms" }
+        ]
+      },
+      {
+        "id": "4",
+        "type": "select",
+        "label": "How did you hear about us?",
+        "required": false,
+        "order": 3,
+        "options": [
+          { "label": "Google Search", "value": "google" },
+          { "label": "Social Media", "value": "social" },
+          { "label": "Friend Referral", "value": "referral" },
+          { "label": "Advertisement", "value": "advertisement" },
+          { "label": "Other", "value": "other" }
+        ]
       }
     ],
     "createdAt": "2024-01-15T10:30:00Z",

@@ -37,7 +37,7 @@ const FormPreview = ({ form }) => {
 
             {/* Form Fields */}
             {form.fields.length > 0 ? (
-              <>
+<>
                 {form.fields
                   .sort((a, b) => a.order - b.order)
                   .map((field) => (
@@ -52,6 +52,8 @@ const FormPreview = ({ form }) => {
                         placeholder={field.placeholder}
                         required={field.required}
                         type={field.type}
+                        options={field.options}
+                        name={`field-${field.id}`}
                       />
                     </motion.div>
                   ))}
