@@ -1,12 +1,54 @@
-import React, { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import FormFieldComponent from "@/components/organisms/FormFieldComponent"
-import ApperIcon from "@/components/ApperIcon"
-import { cn } from "@/utils/cn"
+import React, { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import ApperIcon from "@/components/ApperIcon";
+import FormFieldComponent from "@/components/organisms/FormFieldComponent";
+import { cn } from "@/utils/cn";
 
 const FormEditor = ({ form, onUpdateForm, onSelectField, selectedField }) => {
-  const [dragOverIndex, setDragOverIndex] = useState(null)
+const [dragOverIndex, setDragOverIndex] = useState(null)
+  const [activeField, setActiveField] = useState(null)
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  // Internal field reordering via drag and drop
+  const handleDragStart = (event) => {
+    const { active } = event
+    const field = form.fields.find(f => f.id === active.id)
+    setActiveField(field)
+  }
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event
+    setActiveField(null)
+
+    if (!over) return
+
+    if (active.id !== over.id) {
+      const oldIndex = form.fields.findIndex(f => f.id === active.id)
+      const newIndex = form.fields.findIndex(f => f.id === over.id)
+      
+      const reorderedFields = arrayMove(form.fields, oldIndex, newIndex).map((field, index) => ({
+        ...field,
+        order: index
+      }))
+
+      onUpdateForm({
+        ...form,
+        fields: reorderedFields
+      })
+    }
+  }
   const handleDragOver = (e, index) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = "copy"
@@ -77,6 +119,7 @@ try {
     })
   }
 
+// External drag drop from palette (existing functionality)
   const DropZone = ({ index, isLast = false }) => (
     <div
       className={cn(
@@ -109,31 +152,58 @@ try {
             <h2 className="text-2xl font-bold text-gray-800 mb-2">{form.title}</h2>
             <p className="text-gray-600">Fill out this form to get started</p>
           </div>
-
-          {/* Form Content */}
+{/* Form Content */}
           <div className="p-6">
-            <DropZone index={0} />
-            
-            <AnimatePresence>
-              {form.fields.map((field, index) => (
-                <motion.div
-                  key={field.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <FormFieldComponent
-                    field={field}
-                    isSelected={selectedField?.id === field.id}
-                    onSelect={() => onSelectField(field)}
-                    onUpdate={(updates) => handleFieldUpdate(field.id, updates)}
-                    onDelete={() => handleFieldDelete(field.id)}
-                  />
-                  <DropZone index={index + 1} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={form.fields.map(f => f.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <DropZone index={0} />
+                
+                <AnimatePresence mode="popLayout">
+                  {form.fields
+                    .sort((a, b) => a.order - b.order)
+                    .map((field, index) => (
+                      <motion.div
+                        key={field.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <FormFieldComponent
+                          field={field}
+                          isSelected={selectedField?.id === field.id}
+                          onSelect={() => onSelectField(field)}
+                          onUpdate={(updates) => handleFieldUpdate(field.id, updates)}
+                          onDelete={() => handleFieldDelete(field.id)}
+                        />
+                        <DropZone index={index + 1} />
+                      </motion.div>
+                    ))}
+                </AnimatePresence>
+              </SortableContext>
+              
+              <DragOverlay>
+                {activeField ? (
+                  <div className="transform rotate-2 opacity-90 scale-105">
+                    <FormFieldComponent
+                      field={activeField}
+                      isSelected={false}
+                      onSelect={() => {}}
+                      onUpdate={() => {}}
+                      onDelete={() => {}}
+                    />
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
 
             {form.fields.length === 0 && (
               <motion.div
